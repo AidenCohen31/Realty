@@ -52,6 +52,7 @@ def reset_db():
                                           CONFIRMED integer DEFAULT 0,
                                           LINK string NOT NULL,
                                           ADMIN integer DEFAULT 0,
+                                          UNIT string,
                                           TIMESTAMP string NOT NULL) """)
         cur.execute(""" CREATE TABLE SESSIONS (ID string, 
                                               ADMIN integer DEFAULT 0,
@@ -260,27 +261,26 @@ def getEmail():
         
         return json.dumps(cur.execute(""" SELECT EMAIL FROM USERS""").fetchall())
 
-@app.route("/login", methods=["GET"])
+@app.route("/login", methods=["POST"])
 def createSession():
     sessionid= secrets.token_hex(16)
     csrf = secrets.token_hex(16)
     with sqlite3.connect('test.db') as con:
         cur = con.cursor()
-        if(request.args.get("oauth")):
-            query= cur.execute(f"""SELECT CONFIRMED FROM USERS WHERE email=?""" , (request.args.get("email"),)).fetchone()
-            admin = cur.execute(f"""SELECT ADMIN FROM USERS WHERE email=?""", (request.args.get("email"),)).fetchone()
+        if(request.form.get("oauth")):
+            query= cur.execute(f"""SELECT CONFIRMED FROM USERS WHERE email=?""" , (request.form.get("email"),)).fetchone()
+            admin = cur.execute(f"""SELECT ADMIN FROM USERS WHERE email=?""", (request.form.get("email"),)).fetchone()
             if(query and query[0]):
-                cur.execute(f"""INSERT INTO SESSIONS (ID,ADMIN ,USER, CSRF, TIMESTAMP) VALUES (?,?,?,?,?)""", (sessionid, admin[0],request.args.get("email"), csrf,time.time() ))
+                cur.execute(f"""INSERT INTO SESSIONS (ID,ADMIN ,USER, CSRF, TIMESTAMP) VALUES (?,?,?,?,?)""", (sessionid, admin[0],request.form.get("email"), csrf,time.time() ))
                 resp = make_response({"csrf" : csrf })
                 resp.set_cookie("sessionid" , sessionid, expires=datetime.now() + timedelta(days=1))
                 return resp
 
         else:
-            query= cur.execute(f"""SELECT PASSWORD, CONFIRMED FROM USERS WHERE email=?""",(request.args.get("email"),)).fetchone()
-            admin = cur.execute(f"""SELECT ADMIN FROM USERS WHERE email=?""",(request.args.get("email"),)).fetchone()
-
-            if(query and query[0] == request.args.get("password") and query[1]):
-                cur.execute(f"""INSERT INTO SESSIONS (ID,ADMIN ,USER, CSRF, TIMESTAMP) VALUES (?,?,?,?,?)""", (sessionid, admin,request.args.get("email"), csrf,time.time() ))
+            query= cur.execute(f"""SELECT PASSWORD, CONFIRMED FROM USERS WHERE email=?""",(request.form.get("email"),)).fetchone()
+            admin = cur.execute(f"""SELECT ADMIN FROM USERS WHERE email=?""",(request.form.get("email"),)).fetchone()
+            if(query and query[0] == request.form.get("password") and query[1]):
+                cur.execute(f"""INSERT INTO SESSIONS (ID,ADMIN ,USER, CSRF, TIMESTAMP) VALUES (?,?,?,?,?)""", (sessionid, admin,request.form.get("email"), csrf,time.time() ))
                 resp = make_response({"csrf" : csrf })
                 resp.set_cookie("sessionid" , sessionid, expires=datetime.now() + timedelta(days=1))
                 return resp
@@ -330,6 +330,15 @@ def logout():
         resp.set_cookie("sessionid", "", expires=0)
         return resp
 
+@app.route("/maintenance")
+def maint():
+    with sqlite3.connect('test.db') as con:
+        cur = con.cursor()
+        addr = cur.execute(""" SELECT ADDRESS,UNIT FROM USERS WHERE EMAIL=? """, (request.args.get("email"),)).fetchone()
+        email = cur.execute(""" SELECT MAINTENENCE FROM MANAGEDPROPS WHERE ADDRESS=?""",(addr[0], )).fetchone()[0]
+        msg = f"<html><body><p>{request.args.get('msg') }</p></body> </html>"
+        sendEmail(email, msg , "Maintenance Request " + addr[0] + " " + addr[1])
+        return {"success" : True}
 
 def verify(sessionid , csrf):
      with sqlite3.connect('test.db') as con:
