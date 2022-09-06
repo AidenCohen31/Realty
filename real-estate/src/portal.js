@@ -59,19 +59,26 @@ function Portal(props) {
   <List>
     <img src="/logo.jpeg" width="125px" height="80px" style={{"paddingLeft" : "10px"}} onClick={()=>{navigate("/")}}/>
     <Divider />
-    {
+    { user.admin ?    Object.entries({"Home" : "Home" , "Admin Panel" : "Admin"}).map((text) => 
+      <ListItem key={text[0]} >
+        <Link to={text[1]}> {text[0]} </Link>
+      </ListItem>
+      
+      ) 
+      :
       Object.entries({"Home" : "Home" , "Maintenance" : "Maintenence"}).map((text) => 
       <ListItem key={text[0]} >
         <Link to={text[1]}> {text[0]} </Link>
       </ListItem>
       
-      )
+      ) 
+
     }
   </List>
 </Drawer>
 <Container component="main"    sx={{"overflow":"auto" }}>
 
- { cookies.get("sessionid")  ? <Outlet/> : <Navigate to=""></Navigate>}  
+ { cookies.get("sessionid")  ? <Outlet user={user}/> : <Navigate to=""></Navigate>}  
 </Container>
 </Box>
 

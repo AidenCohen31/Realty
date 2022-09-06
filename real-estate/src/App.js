@@ -14,7 +14,7 @@ import House from "./house.js"
 import Confirm from "./confirm.js"
 import Cookies from 'universal-cookie';
 import Maintenence from './maintenence';
-
+import Admin from "./admin"
 axios.defaults.withCredentials = true
 
 function App() {
@@ -69,6 +69,7 @@ return(
                              </Container>} />
     <Route path= "/portal" element = {!cookies.get("sessionid") ? <Navigate to="/login" replace></Navigate> : <Portal  setCSRF= {setCSRF} csrf={csrf} />  }  >
         <Route path="Home" element = {<Navigate to="/" replace></Navigate>}/>
+        <Route path="Admin" element = {<Admin admin={admin}/>}/>
 
         <Route path="Maintenence" element = {<Maintenence/>}/>
     </Route>

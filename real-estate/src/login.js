@@ -23,8 +23,13 @@ export default function Login(props) {
   const [error, setError] = React.useState(["",""])
   let navigate = useNavigate()
   async function handleSubmit(params){
-       
-       await axios.get("http://localhost:5000/login", {params:params, withCredentials:true}).then(
+      const fd = new FormData()
+      for (const i of Object.entries(params)){
+        console.log(i)
+        fd.append(i[0], i[1])
+      }
+      console.log(fd)
+       await axios.post("http://localhost:5000/login", fd).then(
           (r) => {
             console.log(r)
               if("csrf" in r.data){
