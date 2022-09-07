@@ -22,7 +22,7 @@ export default function Header(){
                     <Button
                     key={i}
                     sx={{ color: 'black', "mx" : 1}}
-                    onClick={navigate(value[1])}
+                    onClick={()=>navigate(value[1])}
                   >
                     {value[0]}
             </Button>
