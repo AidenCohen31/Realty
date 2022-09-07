@@ -215,7 +215,7 @@ def register():
         cur.execute("""INSERT INTO USERS (USERNAME, PASSWORD, EMAIL, ADDRESS, CONFIRMED, LINK, ADMIN, TIMESTAMP) VALUES
                                         (?,?,?,?,?,?,?,?) """, (name ,
                                                                 request.form.get("password"),
-                                                                request.form.get("email"),
+                                                                request.form.get("email").lower(),
                                                                 request.form.get("address"),
                                                                 0,
                                                                 link,
