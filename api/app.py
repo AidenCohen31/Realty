@@ -252,7 +252,7 @@ def sendEmail(to, msg, sub):
         return False
     finally:
         return True 
-@app.route("/apiemail", methods=["GET"])
+@app.route("/api/email", methods=["GET"])
 def getEmail():
     with sqlite3.connect('test.db') as con:
         con.row_factory = lambda cursor, row: row[0]
@@ -267,8 +267,8 @@ def createSession():
     with sqlite3.connect('test.db') as con:
         cur = con.cursor()
         if(request.form.get("oauth")):
-            query= cur.execute(f"""SELECT CONFIRMED FROM USERS WHERE email=?""" , (request.form.get("email"),)).fetchone()
-            admin = cur.execute(f"""SELECT ADMIN FROM USERS WHERE email=?""", (request.form.get("email"),)).fetchone()
+            query= cur.execute(f"""SELECT CONFIRMED FROM USERS WHERE email=?""" , (request.form.get("email").lower(),)).fetchone()
+            admin = cur.execute(f"""SELECT ADMIN FROM USERS WHERE email=?""", (request.form.get("email").lower(),)).fetchone()
             if(query and query[0]):
                 cur.execute(f"""INSERT INTO SESSIONS (ID,ADMIN ,USER, CSRF, TIMESTAMP) VALUES (?,?,?,?,?)""", (sessionid, admin[0],request.form.get("email"), csrf,time.time() ))
                 resp = make_response({"csrf" : csrf })
@@ -276,8 +276,8 @@ def createSession():
                 return resp
 
         else:
-            query= cur.execute(f"""SELECT PASSWORD, CONFIRMED FROM USERS WHERE email=?""",(request.form.get("email"),)).fetchone()
-            admin = cur.execute(f"""SELECT ADMIN FROM USERS WHERE email=?""",(request.form.get("email"),)).fetchone()
+            query= cur.execute(f"""SELECT PASSWORD, CONFIRMED FROM USERS WHERE email=?""",(request.form.get("email").lower(),)).fetchone()
+            admin = cur.execute(f"""    SELECT ADMIN FROM USERS WHERE email=?""",(request.form.get("email").lower(),)).fetchone()
             if(query and query[0] == request.form.get("password") and query[1]):
                 cur.execute(f"""INSERT INTO SESSIONS (ID,ADMIN ,USER, CSRF, TIMESTAMP) VALUES (?,?,?,?,?)""", (sessionid, admin[0],request.form.get("email"), csrf,time.time() ))
                 resp = make_response({"csrf" : csrf })
