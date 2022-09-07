@@ -29,7 +29,7 @@ function Portal(props) {
 
   useEffect(()=>{
     
-    axios.get("http://localhost:5000/api/session", {params:{csrf: props.csrf} , withCredentials:true }).then((r) => {setUser(r.data);} )
+    axios.get("/api/session", {params:{csrf: props.csrf} , withCredentials:true }).then((r) => {setUser(r.data);} )
 
 
   },[props.csrf])
@@ -48,7 +48,7 @@ function Portal(props) {
 <Grid xs={2}>
   <Button sx={{ "color" : "white"}} onClick={(e)=>{setAnchor(e.currentTarget)}}>{user.user}</Button>
   <Menu variant="menu" anchorEl={anchor} open={Boolean(anchor)} onClose={()=>{setAnchor(null)}}>
-    <MenuItem onClick={(e)=>{axios.get("http://localhost:5000/api/logout",{withCredentials:true}).then(()=>{setLoading(true); setAnchor(null)});  }}>Logout</MenuItem>
+    <MenuItem onClick={(e)=>{axios.get("/api/logout",{withCredentials:true}).then(()=>{setLoading(true); setAnchor(null)});  }}>Logout</MenuItem>
   </Menu>
 </Grid>
 </Grid>

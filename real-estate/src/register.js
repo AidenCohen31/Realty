@@ -55,7 +55,7 @@ export default function Register() {
             return;
         }
     }
-    const resp = await axios.get("http://localhost:5000/api/email")
+    const resp = await axios.get("/api/email")
         if(resp.data.includes(email.current.value) ){
             setError(["error", "duplicate email used"])
             return;
@@ -63,7 +63,7 @@ export default function Register() {
         
    
 
-   const r = await axios.post("http://localhost:5000/api/register" , data)
+   const r = await axios.post("/api/register" , data)
         if(r.data.success){
         setError( ["success","Thanks for registering, login will unavailable until confirmed by admins"])
         }
@@ -75,7 +75,7 @@ export default function Register() {
 
   }
   React.useEffect(() => {
-    axios.get("http://localhost:5000/api/managed").then( (r) => {r.data.map((obj) => {setAddress((prev) => [...prev,obj.address])})})
+    axios.get("/api/managed").then( (r) => {r.data.map((obj) => {setAddress((prev) => [...prev,obj.address])})})
   },[])  
 
   return (

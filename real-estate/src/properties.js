@@ -74,7 +74,7 @@ export default function Properties(props){
 
     useEffect(
         ()=>{
-            axios.get("http://localhost:5000/api/session", {withCredentials:true}).then((r)=>{
+            axios.get("/api/session", {withCredentials:true}).then((r)=>{
   
                   if(r.data.admin){
                   setAdmin(true);
@@ -87,7 +87,7 @@ export default function Properties(props){
         },[] )
 
     useEffect(() => {
-        axios.get("http://localhost:5000/api/properties").then( (r) => {setPropCopy(r.data); props.setProperties(r.data)})
+        axios.get("/api/properties").then( (r) => {setPropCopy(r.data); props.setProperties(r.data)})
       },[])  
     function editProperty(obj){
         setEditModal(true);
@@ -98,12 +98,12 @@ export default function Properties(props){
         const fd = new FormData()
         fd.append("pk", pk)
         fd.append("csrf", props.csrf)
-        axios.post("http://localhost:5000/api/delete",fd ).then(()=>{
+        axios.post("/api/delete",fd ).then(()=>{
             window.location.reload(false)
         })
     }
     useEffect(()=>{
-        axios.get("http://localhost:5000/api/search").then((r)=> {
+        axios.get("/api/search").then((r)=> {
             var n = options
             console.log(r.data)
             for(const i of ["city", "beds", "pets","price", "baths"]){
