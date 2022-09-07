@@ -7,8 +7,9 @@ import Box from '@mui/material/Box';
 import AdbIcon from '@mui/icons-material/Adb';
 import Grid from '@mui/material/Grid';
 import { useWindowDimensions } from './hooks';
+import { useNavigate } from 'react-router-dom';
 export default function Header(){
-
+    let navigate = useNavigate();
     return (
         <AppBar  sx={{"backgroundColor" : "white", "position" : "static"}}>
         <Toolbar sx={{"pb" : 3}}>
@@ -21,7 +22,7 @@ export default function Header(){
                     <Button
                     key={i}
                     sx={{ color: 'black', "mx" : 1}}
-                    href={value[1]}
+                    onClick={navigate(value[1])}
                   >
                     {value[0]}
             </Button>
