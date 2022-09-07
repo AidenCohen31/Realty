@@ -25,7 +25,7 @@ function App() {
     useEffect(
       ()=>{
           if(csrf === ""){
-          axios.get("http://localhost:5000/api/token", {withCredentials:true}).then((r)=>{
+          axios.get("/api/token", {withCredentials:true}).then((r)=>{
 
                 if(r.data.csrf){
                 setCSRF(r.data.csrf)
@@ -39,7 +39,7 @@ function App() {
 
       useEffect(
         ()=>{
-            axios.get("http://localhost:5000/api/session", {withCredentials:true}).then((r)=>{
+            axios.get("/api/session", {withCredentials:true}).then((r)=>{
   
                   if(r.data.admin){
                   setAdmin(true);
