@@ -6,7 +6,7 @@ export default function Confirm(){
     const [msg, setMsg] = useState(null);
     useEffect( ()=>{
         axios.post(
-            "http://localhost:5000/confirm/" + params.id ).then( (e)=>{
+            "http://localhost:5000/api/confirm/" + params.id ).then( (e)=>{
                 setMsg(JSON.stringify(e.data))
 
             }

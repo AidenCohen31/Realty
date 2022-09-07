@@ -47,7 +47,7 @@ async function submitForm(e){
     var queryParams = new FormData();
     var termArray= terms.current.value.split(",");
     var error = false;
-    var valid = await axios("http://localhost:5000/geocode" , {params:{"address" : address.current.value }})
+    var valid = await axios("http://localhost:5000/api/geocode" , {params:{"address" : address.current.value }})
     console.log(!valid.data.success)
     if(termArray.length != 3){
         setErrors((prev) => ({...prev, "terms" : true }))
@@ -105,7 +105,7 @@ async function submitForm(e){
         queryParams.append("images[]", imageList[i])
     }
 
-    axios.post("http://localhost:5000/add", queryParams).then(
+    axios.post("http://localhost:5000/api/add", queryParams).then(
     ()=>{
         window.location.reload(false)
     }
@@ -244,7 +244,7 @@ async function submitForm(e,pk){
     var queryParams = new FormData();
     var termArray= terms.current.value.split(",");
     var error = false;
-    var valid = await axios("http://localhost:5000/geocode" , {params:{"address" : address.current.value }})
+    var valid = await axios("http://localhost:5000/api/geocode" , {params:{"address" : address.current.value }})
     console.log(!valid.data.success)
     if(termArray.length != 3){
         setErrors((prev) => ({...prev, "terms" : true }))
@@ -302,7 +302,7 @@ async function submitForm(e,pk){
         queryParams.append("images[]", imageList[i])
     }
 
-    axios.post("http://localhost:5000/edit", queryParams).then(
+    axios.post("http://localhost:5000/api/edit", queryParams).then(
     ()=>{
         window.location.reload(false)
     }

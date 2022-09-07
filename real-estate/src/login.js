@@ -29,7 +29,7 @@ export default function Login(props) {
         fd.append(i[0], i[1])
       }
       console.log(fd)
-       await axios.post("http://localhost:5000/login", fd).then(
+       await axios.post("http://localhost:5000/api/login", fd).then(
           (r) => {
             console.log(r)
               if("csrf" in r.data){

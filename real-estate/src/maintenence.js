@@ -6,7 +6,7 @@ export default function Maintenence(props){
     const msg = useRef(null)
     const [complete, setComplete] = useState(false);
     function handleSubmit(){
-        axios.get("http://localhost:5000/maintenance", {params:{"email": props.user.email,"msg" : msg.current.value  }}).then((
+        axios.get("http://localhost:5000/api/maintenance", {params:{"email": props.user.email,"msg" : msg.current.value  }}).then((
 
             setComplete(true)
         ))
