@@ -15,7 +15,7 @@ app = Flask(__name__)
 client = boto3.client('ses', aws_access_key_id="AKIA2ZY5M47N7Y2RZ2HO", aws_secret_access_key="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", region_name="us-east-2")
 cors = CORS(app, resources=[r"/*"], origins= ["http://localhost:3000"], supports_credentials=True)
 
-@app.route("/reset", methods=["POST"])
+@app.route("/api/reset", methods=["POST"])
 def reset_db():
     with sqlite3.connect('test.db') as con:
         cur = con.cursor()
@@ -23,7 +23,7 @@ def reset_db():
         cur.execute("""DROP TABLE IF EXISTS USERS """)
         cur.execute("""DROP TABLE IF EXISTS SESSIONS """)
         cur.execute("""DROP TABLE IF EXISTS PROPERTIES """)
-        for root,dirs,files in os.walk('../real-estate/public'):
+        for root,dirs,files in os.walk('../real-estate/build'):
             for i in dirs:
                 shutil.rmtree(os.path.join(root,i))
         cur.execute(""" CREATE TABLE PROPERTIES (ID integer PRIMARY KEY,
@@ -65,7 +65,7 @@ def reset_db():
         return {"success" : True}
           
         
-@app.route("/add", methods=["POST"])
+@app.route("/api/add", methods=["POST"])
 def add():
     if(not verify(request.cookies.get("sessionid"), request.form.get("csrf"))):
         return {"success" : False}
@@ -95,9 +95,9 @@ def add():
                                                                                           lng))
         pk = cur.lastrowid
         for inc,i in enumerate(request.form.getlist("images[]")):
-            if(not os.path.exists(f"../real-estate/public/{pk}")):
-                os.mkdir(f"../real-estate/public/{pk}")
-            f = open(f"../real-estate/public/{pk}/{inc}.jpg","wb+")
+            if(not os.path.exists(f"../real-estate/build/{pk}")):
+                os.mkdir(f"../real-estate/build/{pk}")
+            f = open(f"../real-estate/build/{pk}/{inc}.jpg","wb+")
             f.write(base64.b64decode(i.split(",")[1]))
             f.close()
 
@@ -106,7 +106,7 @@ def add():
 
     return {"success" : True}
 
-@app.route("/search", methods=["GET"])
+@app.route("/api/search", methods=["GET"])
 def ranges():
     cols = ["address", "city", "price", "beds", "pets", "date","baths"]
     query = "SELECT ADDRESS, CITY, PRICE, BEDS, PETS, DATE, BATHS  FROM PROPERTIES"
@@ -120,13 +120,13 @@ def ranges():
         return json.dumps(ans)
 
 
-@app.route("/geocode", methods=["GET"])
+@app.route("/api/geocode", methods=["GET"])
 def geocode():
     g = GoogleV3("AIzaSyCjl42UhWDtO8hZByUbclFaI72jDs4k9ag")
     r = g.geocode({"formatted_address" : request.args.get('address')}, exactly_one=True)
     return {"success" : True if r != None else False}
 
-@app.route("/properties", methods=["GET"])
+@app.route("/api/properties", methods=["GET"])
 def properties():
     query = "SELECT * FROM PROPERTIES"
     cols = ["image","address", "city" , "rent", "appfee" , "deposit", "beds", "baths", "dim", "pets", "date", "contact", "summary", "lat", "lng"]
@@ -138,13 +138,13 @@ def properties():
             d = { cols[j]  : i[j] for j in range(len(i)) }
             d["pk"] = d["image"]
             print(i)
-            d["image"] = [str(d["image"]) + "/" +  str(i) for i in os.listdir(f"""../real-estate/public/{d["image"]}""")]
+            d["image"] = [str(d["image"]) + "/" +  str(i) for i in os.listdir(f"""../real-estate/build/{d["image"]}""")]
             
             ans.append(d)
         return json.dumps(ans)
 
 
-@app.route("/delete", methods=["POST"])
+@app.route("/api/delete", methods=["POST"])
 def delete():
     if(not verify(request.cookies.get("sessionid"), request.form.get("csrf"))):
         return {"success" : False}
@@ -153,7 +153,7 @@ def delete():
         cur = con.cursor()
         cur.execute(f"DELETE FROM PROPERTIES WHERE ID={pk}")
     return {"success" : True}
-@app.route("/edit", methods=["POST"])
+@app.route("/api/edit", methods=["POST"])
 def edit():
     if(not verify(request.cookies.get("sessionid"), request.form.get("csrf"))):
         return {"success" : False}
@@ -184,25 +184,25 @@ def edit():
                                                                                           request.form.get("pk")))
         pk = request.form.get("pk")
 
-        if(not os.path.exists(f"../real-estate/public/{pk}")):
-                os.mkdir(f"../real-estate/public/{pk}")
+        if(not os.path.exists(f"../real-estate/build/{pk}")):
+                os.mkdir(f"../real-estate/build/{pk}")
         else:
-            for i in os.listdir(f"../real-estate/public/{pk}"):
+            for i in os.listdir(f"../real-estate/build/{pk}"):
                 if( not f"{pk}/" + str(i) in request.form.getlist("images[]")):
-                    os.remove( f"../real-estate/public/{pk}/" + str(i))
+                    os.remove( f"../real-estate/build/{pk}/" + str(i))
                 
 
         for inc,i in enumerate(request.form.getlist("images[]")):
             if(re.match("./.\.jpg",i)):
-                os.rename(f"../real-estate/public/{i}", f"../real-estate/public/{pk}/{inc}.jpg")
+                os.rename(f"../real-estate/build/{i}", f"../real-estate/build/{pk}/{inc}.jpg")
             else:
-                f = open(f"../real-estate/public/{pk}/{inc}.jpg","wb+")
+                f = open(f"../real-estate/build/{pk}/{inc}.jpg","wb+")
                 f.write(base64.b64decode(i.split(",")[1]))
                 f.close()
     return {"success" : True}
 
 
-@app.route("/register", methods=["POST"])
+@app.route("/api/register", methods=["POST"])
 
 def register():
     with sqlite3.connect('test.db') as con:
@@ -210,7 +210,7 @@ def register():
         name = request.form.get("first").capitalize() + " " + request.form.get("last").capitalize()
         link = secrets.token_hex(16)
         email_msg = f"""<html><head></head><body><p>Hello,</p><p>&nbsp;{name} wants to enroll in the OnePlus portal as a {"admin" if request.form.get("admin") else "tenant"}, navigate to this link to confirm their account.</p>
-<p><a href="http://localhost:3000/confirm/{link}" target="_blank" rel="noopener"><button>Confirm</button></a></p>
+<p><a href="http://oneplusrealtypropertymanagement.com/api/confirm/{link}" target="_blank" rel="noopener"><button>Confirm</button></a></p>
 <p>&nbsp;</p></body></html>"""
         cur.execute("""INSERT INTO USERS (USERNAME, PASSWORD, EMAIL, ADDRESS, CONFIRMED, LINK, ADMIN, TIMESTAMP) VALUES
                                         (?,?,?,?,?,?,?,?) """, (name ,
@@ -228,7 +228,7 @@ def register():
         sendEmail(admins, email_msg, "ACCOUNT CREATION REQUEST",)
         return {"success" : True }
 
-@app.route("/confirm/<hexcode>" , methods=["POST"])
+@app.route("/api/confirm/<hexcode>" , methods=["POST"])
 def confirm(hexcode):
     with sqlite3.connect('test.db') as con:
         cur = con.cursor()  
@@ -237,7 +237,7 @@ def confirm(hexcode):
 
         return {"success" : True}
 
-@app.route("/users", methods=["GET"])
+@app.route("/api/users", methods=["GET"])
 def users():
     with sqlite3.connect('test.db') as con:
         cur = con.cursor()
@@ -252,7 +252,7 @@ def sendEmail(to, msg, sub):
         return False
     finally:
         return True 
-@app.route("/email", methods=["GET"])
+@app.route("/apiemail", methods=["GET"])
 def getEmail():
     with sqlite3.connect('test.db') as con:
         con.row_factory = lambda cursor, row: row[0]
@@ -260,7 +260,7 @@ def getEmail():
         
         return json.dumps(cur.execute(""" SELECT EMAIL FROM USERS""").fetchall())
 
-@app.route("/login", methods=["POST"])
+@app.route("/api/login", methods=["POST"])
 def createSession():
     sessionid= secrets.token_hex(16)
     csrf = secrets.token_hex(16)
@@ -279,21 +279,21 @@ def createSession():
             query= cur.execute(f"""SELECT PASSWORD, CONFIRMED FROM USERS WHERE email=?""",(request.form.get("email"),)).fetchone()
             admin = cur.execute(f"""SELECT ADMIN FROM USERS WHERE email=?""",(request.form.get("email"),)).fetchone()
             if(query and query[0] == request.form.get("password") and query[1]):
-                cur.execute(f"""INSERT INTO SESSIONS (ID,ADMIN ,USER, CSRF, TIMESTAMP) VALUES (?,?,?,?,?)""", (sessionid, admin,request.form.get("email"), csrf,time.time() ))
+                cur.execute(f"""INSERT INTO SESSIONS (ID,ADMIN ,USER, CSRF, TIMESTAMP) VALUES (?,?,?,?,?)""", (sessionid, admin[0],request.form.get("email"), csrf,time.time() ))
                 resp = make_response({"csrf" : csrf })
                 resp.set_cookie("sessionid" , sessionid, expires=datetime.now() + timedelta(days=1))
                 return resp
 
         return {"success" : False}
 
-@app.route('/managed', methods=["GET"])
+@app.route('/api/managed', methods=["GET"])
 def getManaged():
     with sqlite3.connect('test.db') as con:
         con.row_factory = lambda cursor, row: row[0]
         cur= con.cursor()
         return json.dumps(cur.execute(""" SELECT ADDRESS FROM MANAGEDPROPS""").fetchall())
 
-@app.route("/session", methods=["GET"])
+@app.route("/api/session", methods=["GET"])
 def verifySession():
     with sqlite3.connect('test.db') as con:
         cur =  con.cursor()
@@ -305,12 +305,12 @@ def verifySession():
             print(d)
             return d
         return {}
-@app.route("/sessions", methods=["GET"])
+@app.route("/api/sessions", methods=["GET"])
 def session():
         with sqlite3.connect('test.db') as con:
             cur = con.cursor()
             return json.dumps(cur.execute(""" SELECT * FROM SESSIONS""").fetchall())
-@app.route("/token", methods=["GET"])
+@app.route("/api/token", methods=["GET"])
 def token():
         csrf = secrets.token_hex(16)
         with sqlite3.connect('test.db') as con:
@@ -320,7 +320,7 @@ def token():
                 cur.execute(f"""INSERT INTO SESSIONS (ID,ADMIN ,USER, CSRF, TIMESTAMP) VALUES (?,?,?,?,?)""", (request.cookies.get("sessionid"), query[0], query[1], csrf,time.time() ))
         return {"csrf" : csrf}
 
-@app.route("/logout", methods=["GET"])
+@app.route("/api/logout", methods=["GET"])
 def logout():
     with sqlite3.connect('test.db') as con:
         cur = con.cursor()
@@ -329,7 +329,7 @@ def logout():
         resp.set_cookie("sessionid", "", expires=0)
         return resp
 
-@app.route("/maintenance")
+@app.route("/api/maintenance")
 def maint():
     with sqlite3.connect('test.db') as con:
         cur = con.cursor()
