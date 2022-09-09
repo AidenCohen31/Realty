@@ -13,7 +13,7 @@ import shutil
 from datetime import datetime, timedelta
 app = Flask(__name__)
 client = boto3.client('ses', aws_access_key_id="AKIA2ZY5M47N7Y2RZ2HO", aws_secret_access_key="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", region_name="us-east-2")
-cors = CORS(app, resources=[r"/*"], origins= ["http://localhost:3000"], supports_credentials=True)
+cors = CORS(app, resources=[r"/*"], origins= ["*"], supports_credentials=True)
 
 @app.route("/api/reset", methods=["POST"])
 def reset_db():
