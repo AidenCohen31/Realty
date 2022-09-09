@@ -277,13 +277,14 @@ def createSession():
 
         else:
             query= cur.execute(f"""SELECT PASSWORD, CONFIRMED FROM USERS WHERE email=?""",(request.form.get("email").lower(),)).fetchone()
+            print(request.form.get("email").lower())
             admin = cur.execute(f"""    SELECT ADMIN FROM USERS WHERE email=?""",(request.form.get("email").lower(),)).fetchone()
             if(query and query[0] == request.form.get("password") and query[1]):
                 cur.execute(f"""INSERT INTO SESSIONS (ID,ADMIN ,USER, CSRF, TIMESTAMP) VALUES (?,?,?,?,?)""", (sessionid, admin[0],request.form.get("email"), csrf,time.time() ))
                 resp = make_response({"csrf" : csrf })
                 resp.set_cookie("sessionid" , sessionid, expires=datetime.now() + timedelta(days=1))
                 return resp
-
+    
         return {"success" : False}
 
 @app.route('/api/managed', methods=["GET"])

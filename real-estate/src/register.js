@@ -65,7 +65,7 @@ export default function Register() {
 
    const r = await axios.post("/api/register" , data)
         if(r.data.success){
-        setError( ["success","Thanks for registering, login will unavailable until confirmed by admins"])
+        setError( ["success","Thanks for registering, login will be unavailable until confirmed by admins"])
         }
         else{
             setError(["error", "registering failed"])
